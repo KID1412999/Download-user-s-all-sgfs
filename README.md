@@ -1,2 +1,2 @@
 # Download-user-s-all-sgfs
-Download user's all sgfs
+Download user's all sgfs on Foxgo
