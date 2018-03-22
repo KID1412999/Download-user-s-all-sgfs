@@ -28,7 +28,7 @@ def download():#根据棋谱地址提取棋谱
 			f.write(st)
 			f.write("\n")
 			f.close()
-def get_url():构造棋谱地址
+def get_url():#构造棋谱地址
 	for i in range(0,len(s)):
 		url=s[i]
 		html=requests.get(url,headers=head)
