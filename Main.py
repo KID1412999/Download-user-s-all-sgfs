@@ -24,7 +24,8 @@ def download():#根据棋谱地址提取棋谱
 			st=str(st[0])
 			t1=re.findall('PB\[(.+?)\]',st)#用正则表达式提取棋手名字信息
 			t2=re.findall('PW\[(.+?)\]',st)#用正则表达式提取棋手名字信息
-			f=codecs.open('E:\\sgfs\\'+name+'\\'+str(t1[0])+''+'VS'+''+str(t2[0])+''+str(l)+'.sgf',"w",'utf-8')
+			t3=re.findall('DT\[(.+?)\]',st)#用正则表达式提取棋谱时间信息
+			f=codecs.open('E:\\sgfs\\'+name+'\\'+str(t3[0])+str(t1[0])+''+'VS'+''+str(t2[0])+''+str(l)+'.sgf',"w",'utf-8')
 			f.write(st)
 			f.write("\n")
 			f.close()
