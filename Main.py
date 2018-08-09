@@ -50,7 +50,11 @@ def download():#根据棋谱地址提取棋谱
 			t1=re.findall('PB\[(.+?)\]',st)#用正则表达式提取棋手名字信息
 			t2=re.findall('PW\[(.+?)\]',st)#用正则表达式提取棋手名字信息
 			t3=re.findall('DT\[(.+?)\]',st)
-			f=codecs.open('E:\\sgfs\\'+'\\'+str(t3[0])+''+str(t1[0])+''+'VS'+''+str(t2[0])+''+str(l)+'.sgf',"w",'utf-8')
+			if not os.path.exists('E://sgfs'):
+				os.mkdir('E://sgfs/')
+			if not os.path.exists('E://sgfs/'+name):
+				os.mkdir('E://sgfs/'+name)
+			f=codecs.open('E:\\sgfs\\'+name+'\\'+str(t3[0])+''+str(t1[0])+''+'VS'+''+str(t2[0])+''+str(l)+'.sgf',"w",'utf-8')
 			print(str(t3[0])+''+str(t1[0])+''+'VS'+''+str(t2[0])+''+str(l))
 			change_schedule(l,len(q))
 			f.write(st)
@@ -80,10 +84,6 @@ def check():#检查总页数
 if "__name__=__main__":
 	master = Tk()
 	master.title('野狐棋谱下载器  @幻影')
-	if not os.path.exists('E://sgfs'):
-		os.mkdir('E://sgfs/')
-	if not os.path.exists('E://sgfs/'+name):
-		os.mkdir('E://sgfs/'+name)
 	Label(master, text="请输入棋手名字：").grid(row=0)
 	Label(master, text="请输入下载页数：").grid(row=1)
 	e1 = Entry(master)
