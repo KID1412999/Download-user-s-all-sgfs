@@ -75,6 +75,53 @@ def show_number():
 		name='柯洁'
 	total_page('0')
 	tkinter.messagebox.showinfo('提示',name+'共有'+str(sum(c_p))+'页棋谱，请输入下载页数并点击下载棋谱')
+
+def download2():
+	url='http://duiyi.sina.com.cn/qipu/new_gibo.asp'
+	data={'key': '2','keyword':'中国围甲22轮龙元明城杭州-浙江昆仑'}
+	name=e4.get()
+	data.update({'keyword':name})
+	name_=parse.quote(name.encode('gbk'),'gbk')
+	url='http://duiyi.sina.com.cn/gibo/new_gibo.asp?key=2&keyword='+name_
+	html=requests.get(url,headers=head)
+	html.encoding='gbk'
+	ele=etree.HTML(html.text)
+	st=ele.xpath("/html//tr[@class='body_text1']/td[2]/a/@href")
+	urls=[re.findall('(http.+?sgf)',i)[0] for i in st]
+	t=0
+	for i in urls:
+		#time.sleep(1)
+		html=requests.get(i,headers=head)
+		html.encoding="gbk"
+		st=str(html.text)
+		t1=re.findall('PB\[(.+?)\]',st)#用正则表达式提取棋手名字信息
+		if len(t1)==0:
+			t1=['Erro!']
+		t1[0].replace('//','&')
+		t2=re.findall('PW\[(.+?)\]',st)#用正则表达式提取棋手名字信息
+		if len(t2)==0:
+			t2=['Erro!']
+		t2[0].replace('//','&')
+		t3=re.findall('RD\[(.+?)\]',st)#提取日期
+		if len(t3)==0:
+			t3=['Erro!']
+		t4=re.findall('RE\[(.+?)\]',st)#提取结果
+		if len(t4)==0:
+			t4=['Erro!']
+		print(t1,t2,t3,t4)
+		if not os.path.exists(path_+'//sgfs'):
+			os.mkdir(path_+'//sgfs/')
+		if not os.path.exists(path_+'//sgfs/'+name):
+			os.mkdir(path_+'//sgfs/'+name)
+		try:
+			f=codecs.open(path_+'//sgfs//'+name+'//'+str(t3[0])+''+str(t1[0])+''+'VS'+''+str(t2[0])+''+'.sgf',"w",'utf-8')
+		except:
+			f=codecs.open(path_+'//sgfs//'+name+'//'+str(t3[0])+'.sgf',"w",'utf-8')
+		f.write(st)
+		f.close()
+		change_schedule(t,len(urls))
+		t+=1
+	tkinter.messagebox.showinfo('提示','已完成'+str(len(q))+'张棋谱的下载，请前往'+path_+'//sgfs文件夹查看！')
 def download():#根据棋谱地址提取棋谱
 	global name,W_,B_,path_,win_w,win_b
 	global name,n
@@ -139,19 +186,23 @@ if "__name__=__main__":
 	master.title('新浪棋谱下载器  @幻影')
 	Label(master, text="请输入棋手名字：").grid(row=0)
 	Label(master, text="请输入下载页数：").grid(row=1)
+	Label(master, text="请输入比赛名字：").grid(row=2)
 	e1 = Entry(master)
 	e2 = Entry(master)
+	e4 = Entry(master)
 	path = StringVar()
 	e3=Entry(master, textvariable = path).grid(row =3, column =1)
 	Button(master, text = "路径选择", command = selectPath).grid(row =3, column=0)
 	e1.grid(row=0, column=1)
 	e2.grid(row=1, column=1)
-	Button(master, text='棋手信息', command=show_information).grid(row=4, column=2, sticky=W, pady=4)
-	Button(master, text='开始下载', command=download).grid(row=4, column=1, sticky=W, pady=4)
+	e4.grid(row=2, column=1)
+	Button(master, text='棋手信息', command=show_information).grid(row=5, column=2, sticky=W, pady=4)
+	Button(master, text='下载棋手', command=download).grid(row=4, column=1, sticky=W, pady=4)
+	Button(master, text='下载比赛', command=download2).grid(row=4, column=2, sticky=W, pady=4)
 	Button(master, text='查询总页数', command=show_number).grid(row=4, column=0, sticky=W, pady=4)
 	frame = Frame(master).grid(row =2,column =1)#使用时将框架根据情况选择新的位置
 	canvas = Canvas(frame,width = 120,height = 30,bg = "white")
-	canvas.grid(row =2,column =1)
+	canvas.grid(row =6,column =1)
 	x = StringVar()
 	#进度条以及完成程度
 	out_rec = canvas.create_rectangle(5,5,105,25,outline = "blue",width = 1)
