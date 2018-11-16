@@ -1,4 +1,5 @@
 #获取全网棋谱
+
 #coding：utf-8
 import requests
 import codecs
@@ -47,10 +48,11 @@ class Spider:
 		self.urls=[]
 	def get_total_page(self):
 		pass
-	def produce_url(self,page,model):#生产urls
-		self.pages=page
-		for i in range(self.pages+1):#页数
+	def produce_url(self,startpage,page,model):#生产urls
+	
+		for i in range(startpage-1,page+1):#页数
 			self.main_url.append(model[0]+str(i)+model[-1])
+		
 		print(self.main_url)
 	def match(self,url,model,encoding='utf-8'):#model匹配
 		for i in url:
@@ -75,17 +77,17 @@ class Spider:
 				ll=re.findall('purl": "(/f.*sgf)"}',html.text)
 				if len(ll)>=1:
 					self.sgfs_url.append(self.start_url+ll[0])
-	def add_players(self,n):
+	def add_players(self,m,n):
 		self.match([self.start_url+'/chessbook/playerlist/'],'/html//div[@class="col-md-2 left"]/a/@href','utf-8')
 		for i in self.data:
-			for j in i[:n]:
+			for j in i[m:n]:
 				self.urls.append(self.start_url+j)
 		self.data.clear()
 	  
 		for i in self.urls:
 			self.match([i],'/html//ul[@class="pagination pull-right"]/li[last()-1]/a/@href','utf-8')
 		for i in range(len(self.data)):
-			self.produce_url(int(str(self.data[i][0]).split('=')[1]),[self.urls[i]+'?page=',''])
+			self.produce_url(0,int(str(self.data[i][0]).split('=')[1]),[self.urls[i]+'?page=',''])
 	def excuate_url(self,text,re_):
 		for i in text:
 			for j in i:
@@ -139,6 +141,8 @@ class Spider:
 			t1=re.findall('PB\[(.+?)\]',st)#用正则表达式提取棋手名字信息
 			t2=re.findall('PW\[(.+?)\]',st)#用正则表达式提取棋手名字信息
 			t3=re.findall('DT\[(.+?)\]',st)#用正则表达式提取比赛时间信息
+			t4=re.findall('TE\[(.+?)\]',st)#用正则表达式提取比赛场次信息
+			t5=re.findall('RE\[(.+?)\]',st)#用正则表达式提取比赛结果信息
 			if t1==[]:
 				t1.append('unknown')
 			if t2==[]:
@@ -147,63 +151,74 @@ class Spider:
 				t3=re.findall('RD\[(.+?)\]',st)
 			if t3==[]:
 				t3.append('unknown')
-			print(t3,t1,t2)
+			if t4==[]:
+				t4=re.findall('EV\[(.+?)\]',st)
+			if t4==[]:
+				t4=re.findall('C\[(.+?)\]',st)
+			if t4==[]:
+				t4=re.findall('GN\[(.+?)\]',st)
+			if t4==[]:
+				t4.append('未知比赛')
+			if t5==[]:
+				t5.append('结果未知')
+			rr=str(t3[0].replace('/','-'))+' '+str(t4[0])+' '+str(t1[0])+''+'VS'+''+str(t2[0])+' '+str(t5[0].replace('/','%'))+''+'.sgf'
+			print(rr)
 			try:
-				f=codecs.open(self.path+'/sgfs/'+self.name+'/'+str(t3[0].replace('/','-'))+str(t1[0])+''+'VS'+''+str(t2[0])+''+'.sgf',"w",'utf-8')
+				f=codecs.open(self.path+'/sgfs/'+self.name+'/'+rr,"w",'utf-8')
 				f.write(st)
 				f.close()
 			except:
 				print('文件写入出错！')
-def Sina(n):
+def Sina(m,n):
 	#总共960页，每页50张
 	Sina=Spider('http://duiyi.sina.com.cn/gibo/new_gibo.asp','新浪围棋')
-	Sina.produce_url(int(n),['http://duiyi.sina.com.cn/gibo/new_gibo.asp?cur_page=',''])#下载3页
+	Sina.produce_url(m,int(n),['http://duiyi.sina.com.cn/gibo/new_gibo.asp?cur_page=',''])#下载3页
 	Sina.match(Sina.main_url,"/html//tr[@class='body_text1']/td[2]/a/@href",encoding='utf-8')
 	Sina.excuate_url(Sina.data,"load\('(.+?)'\);")
 	Sina.download('gbk')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def TOM(n):
+def TOM(m,n):
 	#总共40页，每页150张
 	TOM=Spider('http://weiqi.tom.com','TOM围棋')
-	TOM.produce_url(int(n),['http://weiqi.tom.com/php/listqipu_0','.html'])
+	TOM.produce_url(m,int(n),['http://weiqi.tom.com/php/listqipu_0','.html'])
 	TOM.match(TOM.main_url,"/html//li[@class='c']/a/@href",'utf-8')#model匹配
 	TOM.excuate_url_2(TOM.data,"../..(.+?).sgf")
 	TOM.download('gbk')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def HongTong(n):
+def HongTong(m,n):
 	#1355页，每页100张
 	HongTong=Spider('http://hotongo.com/','弘通围棋')
-	HongTong.produce_url(int(n),['http://hotongo.com/matchlatest_2011.jsp?pn=',''])
+	HongTong.produce_url(m,int(n),['http://hotongo.com/matchlatest_2011.jsp?pn=',''])
 	HongTong.match(HongTong.main_url,'/html//tr/td[3]/p/a/@href','utf-8')#model匹配
 	HongTong.excuate_url_3(HongTong.data,'http://hotongo.com/chessmanualsgf.jsp?id=')
 	HongTong.download('gbk')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def ChinaGo(n):
+def ChinaGo(m,n):
 	#823页，每页20张
 	ChinaGo=Spider('http://www.qipai.org.cn','中国围棋')
-	ChinaGo.produce_url(int(n),['http://www.qipai.org.cn/web/qpk/list/game/weiqi/page/','/num/20?PHPSESSID=6fmuao0dgc8a5gtsqo1vv645a7'])
+	ChinaGo.produce_url(m,int(n),['http://www.qipai.org.cn/web/qpk/list/game/weiqi/page/','/num/20?PHPSESSID=6fmuao0dgc8a5gtsqo1vv645a7'])
 	ChinaGo.match(ChinaGo.main_url,"/html//table[@class='search-result-table']//a/@href",'utf-8')
 	ChinaGo.excuate_url_4(ChinaGo.data,'code/(.+?)\?')
 	ChinaGo.download('utf-8')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def YiZhao(n):
+def YiZhao(m,n):
 	#共有88,128页，每页10张
 	YiZhao=Spider('http://www.weiqitv.com/kifu','弈招围棋')
-	YiZhao.produce_url(int(n),['http://yi.weiqitv.com/pub/kifu?start=','&len=10&kifuTp=%E5%85%A8%E9%83%A8&gameSort=false&'])
+	YiZhao.produce_url(m,int(n),['http://yi.weiqitv.com/pub/kifu?start=','&len=10&kifuTp=%E5%85%A8%E9%83%A8&gameSort=false&'])
 	YiZhao.excuate_url_5(YiZhao.main_url)
 	YiZhao.download('utf-8')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def KGS(n):
+def KGS(m,n):
 	#2000页，每页20张
 	KGS=Spider('http://gokifu.com','KGS')
-	KGS.produce_url(int(n),['http://gokifu.com/?p=',''])
+	KGS.produce_url(m,int(n),['http://gokifu.com/?p=',''])
 	KGS.match(KGS.main_url,"/html//div[@class='player_block cblock_3']/div[@class='game_type'][last()]/a[2]/@href",'utf-8')
 	KGS.excuate_url_6(KGS.data)
 	KGS.download('utf-8')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
-def Lol(n):
+def Lol(m,n):
 	Lol=Spider('https://www.101weiqi.com','101围棋')
-	Lol.add_players(n)#137位棋手
+	Lol.add_players(m,n)#137位棋手
 	Lol.excuate_url_7()
 	Lol.download('utf-8')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
@@ -213,21 +228,21 @@ def selectPath():
 	path.set(path_)
 
 def start():
-	tkinter.messagebox.showinfo('下载信息：','保存路径:'+path_+'\n围棋站点:'+str(v.get())+'\n下载数量（页）:'+str(e1.get()))
+	tkinter.messagebox.showinfo('下载信息：','保存路径:'+path_+'\n围棋站点:'+str(v.get())+'\n下载数量（页）:'+str(int(e1.get())+1-int(e2.get())))
 	if v.get()==1 and int(e1.get())<823:
-		ChinaGo(int(e1.get()))
+		ChinaGo(int(e2.get()),int(e1.get()))
 	elif  v.get()==2 and int(e1.get())<88128:
-		YiZhao(int(e1.get()))
+		YiZhao(int(e2.get()),int(e1.get()))
 	elif  v.get()==3 and int(e1.get())<960:
-		Sina(int(e1.get()))
+		Sina(int(e2.get()),int(e1.get()))
 	elif  v.get()==4 and int(e1.get())<137:
-		Lol(int(e1.get()))
+		Lol(int(e2.get()),int(e1.get()))
 	elif  v.get()==5 and int(e1.get())<40:
-		TOM(int(e1.get()))
+		TOM(int(e2.get()),int(e1.get()))
 	elif  v.get()==6 and int(e1.get())<1355:
-		HongTong(int(e1.get()))
+		HongTong(int(e2.get()),int(e1.get()))
 	elif  v.get()==7 and int(e1.get())<1999:
-		KGS(int(e1.get()))
+		KGS(int(e2.get()),int(e1.get()))
 def show():
 	tkinter.messagebox.showinfo('统计','新浪围棋 总共959页 每页50张 \nTOM围棋 总共39页，每页150张\n 弘通围棋 总共1354页，每页100张\n 中国围棋 总共822页，每页20张 \n弈招围棋 总共88,127页，每页10张 \nKGS 总共2000页，每页20张\n101围棋网 收录136位棋手')
 
@@ -247,12 +262,16 @@ path= StringVar()
 
 e3=Entry(root, textvariable = path).grid(row =3, column =1)
 Button(root, text = "路径选择", command = selectPath).grid(row =3, column=0)
-l1=Label(root,text='请输入下载页数')
-l1.grid(row=0,column=1)
+l1=Label(root,text='起始页')
+l1.grid(row=1,column=0)
+l2=Label(root,text='终止页')
+l2.grid(row=2,column=0)
 l1=Label(root,text='选择下载站点')
 l1.grid(row=0,column=2)
+e2=Entry(root)
+e2.grid(row=1,column=1)
 e1=Entry(root)
-e1.grid(row=1,column=1)
+e1.grid(row=2,column=1)
 b=Button(root,text='开始下载',command=start)
 b.grid(row=4,column=1)
 root.mainloop()
