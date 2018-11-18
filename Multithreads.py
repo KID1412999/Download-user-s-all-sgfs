@@ -2,7 +2,6 @@
 # coding: utf-8
 
 #获取全网棋谱
-#多线程版
 import requests
 import codecs
 import re
@@ -182,6 +181,8 @@ class Spider:
         for t in threads:#让线程池中的所有数组开始 
             t.join()
     def download(self,encode='utf-8'):
+        global path_
+        self.path=path_+'/'
         if not os.path.exists(self.path+'/sgfs'):
             os.mkdir(self.path+'/sgfs/')
         if not os.path.exists(self.path+'/sgfs/'+self.name):
@@ -213,7 +214,7 @@ class Spider:
                 t4.append('未知比赛')
             if t5==[]:
                 t5.append('结果未知')
-            rr=str(t3[0].replace('/','-'))+' '+str(t4[0].replace('/',''))+' '+str(t1[0].replace('/','-'))+''+'VS'+''+str(t2[0].replace('/','-'))+' '+str(t5[0].replace('/','%'))+''+'.sgf'
+            rr=str(t3[0].replace('/','-'))+'+'+str(t4[0].replace('/',''))+'+'+str(t1[0].replace('/',''))+''+'VS'+''+str(t2[0].replace('/',''))+'+'+str(t5[0].replace('/','%'))+''+'.sgf'
             print(rr)
             try:
                 f=codecs.open(self.path+'/sgfs/'+self.name+'/'+rr,"w",'utf-8')
@@ -281,7 +282,7 @@ def TOM(m,n):
     TOM.match(TOM.main_url,"/html//li[@class='c']/a/@href",'utf-8')#model匹配
     TOM.excuate_url_2(TOM.data,"../..(.+?).sgf")
     TOM.download('gbk')
-    tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
+    tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录的sgfs文件夹下')
 
 
 def selectPath():
