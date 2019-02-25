@@ -154,10 +154,11 @@ class Spider:
 					t3.append('unknown')
 				if t4==[]:
 					t4=re.findall('EV\[(.+?)\]',st)
-				if t4==[]:
-					t4=re.findall('C\[(.+?)\]',st)
+			
 				if t4==[]:
 					t4=re.findall('GN\[(.+?)\]',st)
+				if t4==[]:
+					t4=re.findall('C\[(.+?)\]',st)
 				if t4==[]:
 					t4.append('未知比赛')
 				if t5==[]:
@@ -192,10 +193,11 @@ class Spider:
 				t3.append('unknown')
 			if t4==[]:
 				t4=re.findall('EV\[(.+?)\]',st)
-			if t4==[]:
-				t4=re.findall('C\[(.+?)\]',st)
+			
 			if t4==[]:
 				t4=re.findall('GN\[(.+?)\]',st)
+			if t4==[]:
+				t4=re.findall('C\[(.+?)\]',st)
 			if t4==[]:
 				t4.append('未知比赛')
 			if t5==[]:
