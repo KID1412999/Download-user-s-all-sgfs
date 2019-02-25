@@ -128,6 +128,45 @@ class Spider:
 		print('excuate_url_7 is start<<<<<<------------>>>>>>>>>')
 		for i in self.main_url:
 			self.match_1([i],'/html//tr/td[1]/a/@href','utf-8')
+	def extcuate_url_8(self):
+		if not os.path.exists(self.path+'/sgfs'):
+			os.mkdir(self.path+'/sgfs/')
+		if not os.path.exists(self.path+'/sgfs/'+self.name):
+			os.mkdir(self.path+'/sgfs/'+self.name)
+		for i in self.data:
+			for j in i:
+				html=requests.get(self.start_url+j)
+				e=etree.HTML(html.text)
+				s=e.xpath('/html//div[@class="panel-body eidogo-player-auto modal-content"]//text()')[0]
+				st=s
+				t1=re.findall('PB\[(.+?)\]',st)#用正则表达式提取棋手名字信息
+				t2=re.findall('PW\[(.+?)\]',st)#用正则表达式提取棋手名字信息
+				t3=re.findall('DT\[(.+?)\]',st)#用正则表达式提取比赛时间信息
+				t4=re.findall('TE\[(.+?)\]',st)#用正则表达式提取比赛场次信息
+				t5=re.findall('RE\[(.+?)\]',st)#用正则表达式提取比赛结果信息
+				if t1==[]:
+					t1.append('unknown')
+				if t2==[]:
+					t2.append('unknown')
+				if t3==[]:
+					t3=re.findall('RD\[(.+?)\]',st)
+				if t3==[]:
+					t3.append('unknown')
+				if t4==[]:
+					t4=re.findall('EV\[(.+?)\]',st)
+				if t4==[]:
+					t4=re.findall('C\[(.+?)\]',st)
+				if t4==[]:
+					t4=re.findall('GN\[(.+?)\]',st)
+				if t4==[]:
+					t4.append('未知比赛')
+				if t5==[]:
+					t5.append('结果未知')
+				rr=str(t3[0].replace('/','-'))+' '+str(t4[0].replace('/',''))+' '+str(t1[0].replace('/','-'))+''+'VS'+''+str(t2[0].replace('/','-'))+' '+str(t5[0].replace('/','%'))+''+'.sgf'
+				print(rr)
+				f=codecs.open(self.path+'/sgfs/'+self.name+'/'+rr,"w",'utf-8')
+				f.write(st)
+				f.close()
 
 	def download(self,coding):
 		if not os.path.exists(self.path+'/sgfs'):
@@ -222,6 +261,15 @@ def Lol(m,n):
 	Lol.excuate_url_7()
 	Lol.download('utf-8')
 	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
+def Fox(m,n):
+	Fox=Spider('http://weiqi.qq.com','野狐围棋')
+	Fox.produce_url(int(m),int(n),['http://weiqi.qq.com/qipu/index/p/',''])
+	#KGS.match(KGS.main_url,"/html//div[@class='player_block cblock_3']/div[@class='game_type'][last()]/a[2]/@href",'utf-8')
+	#KGS.excuate_url_6(KGS.data)
+	#KGS.download('utf-8')
+	Fox.match(Fox.main_url,"/html//a[@class='px14']/@href",'utf-8')
+	Fox.extcuate_url_8()
+	tkinter.messagebox.showinfo('下载信息：','下载完成！\n棋谱文件在所选目录下的sgfs文件夹下')
 def selectPath():
 	global path_
 	path_=askdirectory()
@@ -243,11 +291,13 @@ def start():
 		HongTong(int(e2.get()),int(e1.get()))
 	elif  v.get()==7 and int(e1.get())<1999:
 		KGS(int(e2.get()),int(e1.get()))
+	elif  v.get()==8 and int(e1.get())<34:
+		Fox(int(e2.get()),int(e1.get()))
 def show():
 	tkinter.messagebox.showinfo('统计','新浪围棋 总共959页 每页50张 \nTOM围棋 总共39页，每页150张\n 弘通围棋 总共1354页，每页100张\n 中国围棋 总共822页，每页20张 \n弈招围棋 总共88,127页，每页10张 \nKGS 总共2000页，每页20张\n101围棋网 收录136位棋手')
 
 root=Tk()
-la=[('中国围棋','1'),('弈招围棋','2'),('新浪围棋','3'),('101围棋','4'),('TOM围棋','5'),('弘通围棋','6'),('KGS围棋','7')]
+la=[('中国围棋','1'),('弈招围棋','2'),('新浪围棋','3'),('101围棋','4'),('TOM围棋','5'),('弘通围棋','6'),('KGS围棋','7'),('野狐围棋','8')]
 v=IntVar()
 v.set(0)
 i=1
